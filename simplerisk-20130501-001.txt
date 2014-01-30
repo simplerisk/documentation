@@ -1,0 +1,19 @@
+New Features Added Since 20130415 release:
+
+* Fixed an issue with checking existence of AD file
+* Added password reset functionality
+
+If you do not import the new database schema directly, the following should work to upgrade from version 201304015 to 20130501-001:
+
+Upgrade Commands:
+
+CREATE TABLE `simplerisk`.`password_reset` (
+`username` VARCHAR( 20 ) NOT NULL ,
+`token` VARCHAR( 20 ) NOT NULL ,
+`attempts` INT NOT NULL DEFAULT '0',
+`timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE = MYISAM ;
+
+DELETE FROM
+`simplerisk`.`settings` WHERE
+`settings`.`name` = 'app_version';

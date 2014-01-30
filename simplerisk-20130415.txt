@@ -1,0 +1,81 @@
+New Features Added Since 20130319 release:
+
+* Added next step to manager review
+* Added salt to password hashing
+* Added login and logout
+* Added change password form
+* Added authentication for admin functions
+* Added email to user profiles
+* Added risk location information
+* Added mitigation effort
+* Added risk dashboard
+* Changed INNER JOIN to LEFT JOIN on get_risks function
+* Set Likelihood and Impact to default to 1 if not set when submitted
+* Removed donate page and added about page
+* Added software versioning to about page
+* Added license information to about page
+
+If you do not import the new database schema directly, the following should work to upgrade from version 20130319-001 (aka version 2) to 20130415:
+
+Upgrade Commands:
+
+CREATE TABLE `simplerisk`.`next_step` (
+`value` INT NOT NULL AUTO_INCREMENT ,
+`name` VARCHAR( 50 ) NOT NULL ,
+PRIMARY KEY ( `value` )
+) ENGINE = MYISAM ;
+
+INSERT INTO `simplerisk`.`next_step` (
+`value` ,
+`name`
+)
+VALUES (
+NULL , 'Accept Until Next Review'
+), (
+NULL , 'Consider for Project'
+), (
+NULL , 'Submit as a Production Issue'
+);
+
+ALTER TABLE `mgmt_reviews` ADD `next_step` INT NOT NULL AFTER `reviewer`
+
+ALTER TABLE `user` ADD `email` VARCHAR( 200 ) NOT NULL AFTER `name`
+
+CREATE TABLE `simplerisk`.`location` (
+`value` INT NOT NULL AUTO_INCREMENT ,
+`name` VARCHAR( 100 ) NOT NULL ,
+PRIMARY KEY ( `value` )
+) ENGINE = MYISAM ;
+
+ALTER TABLE `risks` ADD `location` INT NOT NULL AFTER `subject`
+
+CREATE TABLE `simplerisk`.`mitigation_effort` (
+`value` INT NOT NULL AUTO_INCREMENT ,
+`name` VARCHAR( 20 ) NOT NULL ,
+PRIMARY KEY ( `value` )
+) ENGINE = MYISAM ;
+
+ALTER TABLE `mitigations` ADD `mitigation_effort` INT NOT NULL AFTER `planning_strategy`
+
+ALTER TABLE `risks` CHANGE `likelihood` `likelihood` INT( 11 ) NOT NULL
+
+ALTER TABLE `risks` CHANGE `impact` `impact` INT( 11 ) NOT NULL
+
+INSERT INTO `user` (`value`, `username`, `name`, `email`, `password`, `last_login`, `admin`, `review_high`, `review_medium`, `review_low`) VALUES
+(1, 'admin', 'Admin', '', '$2a$15$21232f297a57a5a743894Oi8eYwNRFyfL7SWQ8schB43FnU2qULWq', '0000-00-00 00:00:00', 1, 1, 1, 1);
+
+INSERT INTO `category` (`name`) VALUES
+('Technical Vulnerability Management'),
+('Sensitive Data Management'),
+('Policy and Procedure'),
+('Physical Security'),
+('Monitoring'),
+('Environmental Resilience'),
+('Access Management'),
+('Third-Party Management');
+
+ALTER TABLE `settings` CHANGE `value` `value` VARCHAR( 12 ) NOT NULL
+
+UPDATE `simplerisk`.`settings` SET `value` = '20130415-001' WHERE `settings`.`name` = 'db_version' AND `settings`.`value` = '20130415' LIMIT 1 ;
+
+UPDATE `simplerisk`.`settings` SET `value` = '20130415-001' WHERE `settings`.`name` = 'app_version' AND `settings`.`value` = '2' LIMIT 1 ;
