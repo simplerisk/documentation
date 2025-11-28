@@ -678,9 +678,12 @@ EOF
   exec_cmd 'mkdir -p /etc/apache2/ssl.key /etc/apache2/ssl.csr /etc/apache2/ssl.crt'
 
   # Generate the OpenSSL private key
-  exec_cmd 'openssl rand -hex 50 > /tmp/pass_openssl.txt'
-  exec_cmd 'openssl genrsa -des3 -passout file:/tmp/pass_openssl.txt -out /etc/apache2/ssl.key/simplerisk.pass.key'
-  exec_cmd 'openssl rsa -passin file:/tmp/pass_openssl.txt -in /etc/apache2/ssl.key/simplerisk.pass.key -out /etc/apache2/ssl.key/simplerisk.key'
+  exec_cmd 'openssl genrsa -des3 -passout file:/tmp/pass_openssl.txt -out test.key'
+  exec_cmd 'chmod 600 /tmp/pass_openssl.txt'
+  exec_cmd 'openssl genrsa \
+  -aes256 \
+  -passout file:/tmp/pass_openssl.txt \
+  -out test.key'
 
   # Remove the original key file
   exec_cmd 'rm /etc/apache2/ssl.key/simplerisk.pass.key /tmp/pass_openssl.txt'
