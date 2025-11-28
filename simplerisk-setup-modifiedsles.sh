@@ -686,12 +686,12 @@ EOF
   exec_cmd 'rm /etc/apache2/ssl.key/simplerisk.pass.key /tmp/pass_openssl.txt'
 
   # Generate the CSR
-  exec_cmd 'openssl rand -hex 50 > /tmp/pass_openssl.txt
-PASS="$(cat /tmp/pass_openssl.txt)"'
+  exec_cmd 'openssl rand -hex 50 > /tmp/pass_openssl.txt'
+PASS="$(cat /tmp/pass_openssl.txt)"
 
   # Create the Certificate
-  exec_cmd 'openssl genrsa -des3 -passout "pass:${PASS}" -out /etc/apache2/ssl.key/simplerisk.pass.key
-unset PASS'
+  exec_cmd 'openssl genrsa -des3 -passout "pass:${PASS}" -out /etc/apache2/ssl.key/simplerisk.pass.key'
+unset PASS
 exec_cmd 'chmod 600 /tmp/pass_openssl.txt'
 
 
