@@ -674,28 +674,43 @@ EOF
 
   generate_passwords
 
-  # Ensure SSL directories exist for OpenSSL output
-  exec_cmd 'mkdir -p /etc/apache2/ssl.key /etc/apache2/ssl.csr /etc/apache2/ssl.crt'
+ #!/bin/bash
 
-  # Generate the OpenSSL private key
-  exec_cmd 'openssl genrsa -des3 -passout file:/tmp/pass_openssl.txt -out test.key'
-  exec_cmd 'chmod 600 /tmp/pass_openssl.txt'
-  exec_cmd 'openssl genrsa \
-  -aes256 \
-  -passout file:/tmp/pass_openssl.txt \
-  -out test.key'
+# Where to store files
+KEY_DIR="/etc/apache2"
+mkdir -p "$KEY_DIR"
 
-  # Remove the original key file
-  exec_cmd 'rm /etc/apache2/ssl.key/simplerisk.pass.key /tmp/pass_openssl.txt'
+KEY_FILE="$KEY_DIR/ssl.key/server.key"
+CSR_FILE="$KEY_DIR/ssl.csr/server.csr"
+CRT_FILE="$KEY_DIR/ssl.crt/server.crt"
 
-  # Generate the CSR
- exec_cmd "openssl rand -hex 50" > /tmp/pass_openssl.txt
-PASS="$(cat /tmp/pass_openssl.txt)"
+mkdir -p "$(dirname "$KEY_FILE")" "$(dirname "$CSR_FILE")" "$(dirname "$CRT_FILE")"
 
-  # Create the Certificate
-  exec_cmd 'openssl genrsa -des3 -passout "pass:${PASS}" -out /etc/apache2/ssl.key/simplerisk.pass.key'
-unset PASS
-exec_cmd 'chmod 600 /tmp/pass_openssl.txt'
+# Generate an RSA private key (works in OpenSSL 3 and FIPS)
+openssl genpkey \
+  -algorithm RSA \
+  -pkeyopt rsa_keygen_bits:2048 \
+  -out "$KEY_FILE"
+
+# Create a CSR
+openssl req \
+  -new \
+  -key "$KEY_FILE" \
+  -subj "/C=US/ST=None/L=None/O=Example/OU=IT/CN=localhost" \
+  -out "$CSR_FILE"
+
+# Create a self-signed certificate valid for 1 year
+openssl req \
+  -x509 \
+  -key "$KEY_FILE" \
+  -in "$CSR_FILE" \
+  -days 365 \
+  -out "$CRT_FILE"
+
+echo "Key:  $KEY_FILE"
+echo "CSR:  $CSR_FILE"
+echo "Cert: $CRT_FILE"
+
 
 
   cat << EOF >> /etc/apache2/vhosts.d/ssl.conf
@@ -708,8 +723,8 @@ Options -Indexes
 Options FollowSymLinks
 Options SymLinksIfOwnerMatch
 SSLEngine on
-SSLCertificateFile /etc/apache2/ssl.crt/simplerisk.crt
-SSLCertificateKeyFile /etc/apache2/ssl.key/simplerisk.key
+SSLCertificateFile      /etc/apache2/ssl.crt/server.crt
+SSLCertificateKeyFile   /etc/apache2/ssl.key/server.key
 #SSLCertificateChainFile /etc/apache2/ssl.crt/vhost-example-chain.crt
 EOF
 
