@@ -660,16 +660,18 @@ setup_suse(){
 
   cat << EOF >> /etc/apache2/vhosts.d/simplerisk.conf
 DocumentRoot "/var/www/simplerisk/"
-ErrorLog /var/log/apache2/error_log
-CustomLog /var/log/apache2/access_log combined
-AllowOverride all
-Require all granted
-Options -Indexes
-Options FollowSymLinks
-Options SymLinksIfOwnerMatch
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^/?(.*) https://%{SERVER_NAME}/\$1 [R,L]
+	ErrorLog /var/log/httpd/error_log
+	CustomLog /var/log/httpd/access_log combined
+	<Directory "/var/www/simplerisk/">
+		AllowOverride all
+		Require all granted
+		Options -Indexes
+		Options FollowSymLinks
+		Options SymLinksIfOwnerMatch
+	</Directory>
+	RewriteEngine On
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^/?(.*) https://%{SERVER_NAME}/\$1 [R,L]
 EOF
 
   generate_passwords
@@ -715,17 +717,18 @@ echo "Cert: $CRT_FILE"
 
   cat << EOF >> /etc/apache2/vhosts.d/ssl.conf
 DocumentRoot "/var/www/simplerisk/"
-ErrorLog /var/log/apache2/error_log
-CustomLog /var/log/apache2/access_log combined
-AllowOverride all
-Require all granted
-Options -Indexes
-Options FollowSymLinks
-Options SymLinksIfOwnerMatch
-SSLEngine on
-SSLCertificateFile      /etc/apache2/ssl.crt/server.crt
-SSLCertificateKeyFile   /etc/apache2/ssl.key/server.key
-#SSLCertificateChainFile /etc/apache2/ssl.crt/vhost-example-chain.crt
+	ErrorLog /var/log/apache2/error_log
+	CustomLog /var/log/apache2/access_log combined
+	<Directory "/var/www/simplerisk/">
+		AllowOverride all
+		Require all granted
+		Options -Indexes
+		Options FollowSymLinks
+		Options SymLinksIfOwnerMatch
+	</Directory>
+	SSLEngine on
+	SSLCertificateFile      /etc/apache2/ssl.crt/server.crt
+	SSLCertificateKeyFile   /etc/apache2/ssl.key/server.key
 EOF
 
   print_status 'Configuring secure settings for Apache...'
