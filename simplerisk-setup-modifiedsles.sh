@@ -660,8 +660,8 @@ setup_suse(){
 
   cat << EOF >> /etc/apache2/vhosts.d/simplerisk.conf
 DocumentRoot "/var/www/simplerisk/"
-	ErrorLog /var/log/httpd/error_log
-	CustomLog /var/log/httpd/access_log combined
+	ErrorLog /var/log/apache2/error_log
+	CustomLog /var/log/apache2/access_log combined
 	<Directory "/var/www/simplerisk/">
 		AllowOverride all
 		Require all granted
