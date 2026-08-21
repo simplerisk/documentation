@@ -1,0 +1,6 @@
+# PDFs are binary. Without this, core.autocrlf=true (the Windows default) expands
+# every LF in the PDF byte stream to CRLF on checkout, so a clean clone produces
+# files that differ from what was committed - the 20260519-001 release notes
+# checked out 143 bytes larger than their blob. The stored blobs were correct;
+# only the working-tree copies were being rewritten.
+*.pdf binary
